@@ -8,7 +8,7 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@id/main"
+        android:id="@+id/button"
         android:text="Запомнить точку"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

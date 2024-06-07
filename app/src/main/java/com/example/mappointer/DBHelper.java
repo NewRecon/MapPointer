@@ -27,9 +27,9 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createTable = "CREATE TABLE " + TABLE_NAME + "("
-                + "id UUID PRIMARY KEY, "
-                + COLUMN_GEO_POINT_LATITUDE + " TEXT , "
-                + COLUMN_GEO_POINT_LONGITUDE + " REAL"
+                + COLUMN_GEO_POINT_LATITUDE + " TEXT PRIMARY KEY, "
+                + COLUMN_GEO_POINT_LONGITUDE + " TEXT ,"
+                + COLUMN_DESCRIPTION + " TEXT "
                 + ")";
         db.execSQL(createTable);
     }
@@ -40,7 +40,7 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void insertOrUpdateExchangeRate(String latitude, String longitude, String description) {
+    public void insertOrUpdatePoints(String latitude, String longitude, String description) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -58,7 +58,25 @@ public class DBHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public Cursor getExchangeRate(String latitude, String longitude) {
+    public void insertOrUpdatePoints(Point point, String description) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_GEO_POINT_LATITUDE, point.getLatitude());
+        values.put(COLUMN_GEO_POINT_LONGITUDE, point.getLongitude());
+        values.put(COLUMN_DESCRIPTION, description);
+
+        long id = db.insertWithOnConflict(
+                TABLE_NAME,
+                null,
+                values,
+                SQLiteDatabase.CONFLICT_REPLACE
+        );
+
+        db.close();
+    }
+
+    public Cursor getExchangePoint(String latitude, String longitude) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(

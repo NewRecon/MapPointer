@@ -1,20 +1,41 @@
 package com.example.mappointer;
 
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-public class MainActivity extends AppCompatActivity {
+import android.Manifest;
 
-    private Button button;
+import com.example.mappointer.models.Point;
+
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity implements LocationListener {
+
+    // api
     private static final String API_KEY = "5770a16c-9f56-4da5-813c-95a4ad1c70ad";
     private static final String API_KEY_LOCATOR = "282c1ae4-1d2b-41fe-a2a2-a51324fb8389";
+
+    // geolocation
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private LocationManager locationManager;
+
+    // database
     private DBHelper dbHelper;
+
+    // view
+    private Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,12 +48,73 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        button = findViewById(R.id.button);
+
         dbHelper = new DBHelper(this);
 
-        button.setOnClickListener((v)->{
+        // GPS
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        if (this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        } else {
+            this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
 
+        button.setOnClickListener((v) -> {
+            Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            Point p = new Point(Double.toString(location.getLatitude()), Double.toString(location.getLongitude()));
+            dbHelper.insertOrUpdatePoints(p, "qwe");
+
+            Log.i("point", dbHelper.getAllPoints().toString());
         });
+
+        //TODO
+        /**
+         * frameLayout
+         * mapView
+         * yandex.android.maps
+         * implementation 'com.yandex.android:maps:3.7.0'
+         *
+         * implementation("com.squareup.retrofit2:retrofit:2.9.0")
+         * implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+         */
 
     }
 
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        // Обновление местоположения
+        double latitude = location.getLatitude();
+        double longitude = location.getLongitude();
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull List<Location> locations) {
+        LocationListener.super.onLocationChanged(locations);
+    }
+
+    @Override
+    public void onFlushComplete(int requestCode) {
+        LocationListener.super.onFlushComplete(requestCode);
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+        LocationListener.super.onStatusChanged(provider, status, extras);
+    }
+
+    @Override
+    public void onProviderEnabled(@NonNull String provider) {
+        LocationListener.super.onProviderEnabled(provider);
+    }
+
+    @Override
+    public void onProviderDisabled(@NonNull String provider) {
+        LocationListener.super.onProviderDisabled(provider);
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+        super.onPointerCaptureChanged(hasCapture);
+    }
 }
