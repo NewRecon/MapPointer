@@ -3,10 +3,14 @@ package com.example.mappointer.models;
 public class Point {
     private String latitude;
     private String longitude;
+    private String description;
 
-    public Point(String latitude, String longitude) {
+    public Point(){}
+
+    public Point(String latitude, String longitude, String description) {
         this.latitude = latitude;
         this.longitude = longitude;
+        this.description = description;
     }
 
     public String getLatitude() {
@@ -27,9 +31,14 @@ public class Point {
 
     @Override
     public String toString() {
-        return "Point{" +
-                "latitude='" + latitude + '\'' +
-                ", longitude='" + longitude + '\'' +
-                '}';
+        return description;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

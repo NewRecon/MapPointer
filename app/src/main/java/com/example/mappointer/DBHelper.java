@@ -40,31 +40,13 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void insertOrUpdatePoints(String latitude, String longitude, String description) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_GEO_POINT_LATITUDE, latitude);
-        values.put(COLUMN_GEO_POINT_LONGITUDE, longitude);
-        values.put(COLUMN_DESCRIPTION, description);
-
-        long id = db.insertWithOnConflict(
-                TABLE_NAME,
-                null,
-                values,
-                SQLiteDatabase.CONFLICT_REPLACE
-        );
-
-        db.close();
-    }
-
-    public void insertOrUpdatePoints(Point point, String description) {
+    public void insertOrUpdatePoints(Point point) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(COLUMN_GEO_POINT_LATITUDE, point.getLatitude());
         values.put(COLUMN_GEO_POINT_LONGITUDE, point.getLongitude());
-        values.put(COLUMN_DESCRIPTION, description);
+        values.put(COLUMN_DESCRIPTION, point.getDescription());
 
         long id = db.insertWithOnConflict(
                 TABLE_NAME,
@@ -74,23 +56,6 @@ public class DBHelper extends SQLiteOpenHelper {
         );
 
         db.close();
-    }
-
-    public Cursor getExchangePoint(String latitude, String longitude) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.query(
-                TABLE_NAME,
-                null,
-                COLUMN_GEO_POINT_LATITUDE + " = ? and "
-                        + COLUMN_GEO_POINT_LONGITUDE + " = ?",
-                new String[]{latitude, longitude},
-                null,
-                null,
-                null
-        );
-
-        return cursor;
     }
 
     public List<Point> getAllPoints() {
@@ -100,7 +65,7 @@ public class DBHelper extends SQLiteOpenHelper {
         Cursor cursor = db.query(
                 true,
                 TABLE_NAME,
-                new String[]{COLUMN_GEO_POINT_LATITUDE, COLUMN_GEO_POINT_LONGITUDE},
+                new String[]{COLUMN_GEO_POINT_LATITUDE, COLUMN_GEO_POINT_LONGITUDE, COLUMN_DESCRIPTION},
                 null,
                 null,
                 null,
@@ -113,7 +78,8 @@ public class DBHelper extends SQLiteOpenHelper {
             do {
                 @SuppressLint("Range")String latitude = cursor.getString(cursor.getColumnIndex(COLUMN_GEO_POINT_LATITUDE));
                 @SuppressLint("Range")String longitude = cursor.getString(cursor.getColumnIndex(COLUMN_GEO_POINT_LONGITUDE));
-                Point point = new Point(latitude, longitude);
+                @SuppressLint("Range")String description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
+                Point point = new Point(latitude, longitude, description);
                 points.add(point);
             } while (cursor.moveToNext());
         }
@@ -122,5 +88,39 @@ public class DBHelper extends SQLiteOpenHelper {
         db.close();
 
         return points;
+    }
+
+    public Point getPointByDescription(String desc) {
+        Point result = new Point();
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(
+                true,
+                TABLE_NAME,
+                new String[]{COLUMN_GEO_POINT_LATITUDE, COLUMN_GEO_POINT_LONGITUDE, COLUMN_DESCRIPTION},
+                COLUMN_DESCRIPTION + " = ?",
+                new String[]{desc},
+                null,
+                null,
+                null,
+                null
+        );
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                @SuppressLint("Range")String latitude = cursor.getString(cursor.getColumnIndex(COLUMN_GEO_POINT_LATITUDE));
+                @SuppressLint("Range")String longitude = cursor.getString(cursor.getColumnIndex(COLUMN_GEO_POINT_LONGITUDE));
+                @SuppressLint("Range")String description = cursor.getString(cursor.getColumnIndex(COLUMN_DESCRIPTION));
+                result.setLatitude(latitude);
+                result.setLongitude(longitude);
+                result.setDescription(description);
+                break;
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+
+        return result;
     }
 }

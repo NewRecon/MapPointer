@@ -1,12 +1,15 @@
 package com.example.mappointer;
 
+import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -15,17 +18,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import android.Manifest;
-
 import com.example.mappointer.models.Point;
+import com.yandex.mapkit.MapKitFactory;
+import com.yandex.mapkit.mapview.MapView;
 
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
-
-    // api
-    private static final String API_KEY = "5770a16c-9f56-4da5-813c-95a4ad1c70ad";
-    private static final String API_KEY_LOCATOR = "282c1ae4-1d2b-41fe-a2a2-a51324fb8389";
 
     // geolocation
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -35,7 +34,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private DBHelper dbHelper;
 
     // view
-    private Button button;
+    private Button savePointButton;
+    private Button showPointsButton;
+    private EditText text;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +49,9 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             return insets;
         });
 
-        button = findViewById(R.id.button);
+        savePointButton = findViewById(R.id.savePointButton);
+
+        text = findViewById(R.id.descText);
 
         dbHelper = new DBHelper(this);
 
@@ -60,25 +63,21 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
             this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
 
-        button.setOnClickListener((v) -> {
+        savePointButton.setOnClickListener((v) -> {
             Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            Point p = new Point(Double.toString(location.getLatitude()), Double.toString(location.getLongitude()));
-            dbHelper.insertOrUpdatePoints(p, "qwe");
-
-            Log.i("point", dbHelper.getAllPoints().toString());
+            Point p = new Point(Double.toString(location.getLatitude()), Double.toString(location.getLongitude()), text.getText().toString());
+            dbHelper.insertOrUpdatePoints(p);
         });
 
-        //TODO
-        /**
-         * frameLayout
-         * mapView
-         * yandex.android.maps
-         * implementation 'com.yandex.android:maps:3.7.0'
-         *
-         * implementation("com.squareup.retrofit2:retrofit:2.9.0")
-         * implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-         */
+        showPointsButton = findViewById(R.id.showPointsButton);
 
+        showPointsButton.setOnClickListener(this::startNewActivity);
+    }
+
+    public void startNewActivity(View v) {
+        Intent intent = new Intent(this, MapListActivity.class);
+
+        startActivity(intent);
     }
 
     @Override

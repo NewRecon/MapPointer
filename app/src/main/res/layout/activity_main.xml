@@ -1,17 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/button"
-        android:text="Запомнить точку"
+    <EditText
+        android:id="@+id/descText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:ignore="MissingConstraints" />
+        android:height="300px"
+        android:layout_margin="10px"
+        android:text="введите описание"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <Button
+        android:id="@+id/savePointButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Запомнить точку"
+        tools:ignore="MissingConstraints"
+        android:layout_margin="10px" />
+
+    <Button
+        android:id="@+id/showPointsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Показать все точки"
+        tools:ignore="MissingConstraints"
+        android:layout_margin="10px"/>
+
+</LinearLayout>
